@@ -1,1 +1,7 @@
 https://sharnbasvauniversity.edu.in/enlightencode.hackathon.sharnbasvauniversity.edu.in/
+
+site is live at 
+https://yahya94812.github.io/MindCare-AI/dist
+
+source code 
+https://github.com/yahya94812/MindCare-AI
