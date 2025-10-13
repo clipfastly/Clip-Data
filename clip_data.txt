@@ -1,48 +1,186 @@
-0import numpy as np
+# Uber fare prediction - clean, runnable version
 import pandas as pd
-import os
-def bfs(src,target):
-    queue=[]
-    queue.append(src)
-    exp=[]
-    while len(queue)>0:
-        source=queue.pop(0)
-        exp.append(source)
-        print(source)
-        if source==target:
-            print("success")
-            return
-        poss_moves_to_do=[]
-        poss_moves_to_do=possible_moves(source,exp)
-        for move in poss_moves_to_do:
-            if move not in exp and move not in queue:
-                queue.append(move)
-def possible_moves(state,visited_states):
-    b=state.index(0)
-    d=[]
-    if b not in[0,1,2]:
-        d.append('u')
-    if b not in[6,7,8]:
-        d.append('d')
-    if b not in[0,3,6]:
-        d.append('l')
-    if b not in[2,5,8]:
-        d.append('r')
-    poss_moves_it_can=[]
-    for i in d:
-        poss_moves_it_can.append(gen(state,i,b))
-    return[move_it_can for move_it_can in poss_moves_it_can if move_it_can not in visited_states]
-def gen(state,m,b):
-    temp=state.copy()
-    if m=='d':
-        temp[b+3],temp[b]=temp[b],temp[b+3]
-    if m=='u':
-        temp[b-3],temp[b]=temp[b],temp[b-3]
-    if m=='l':
-        temp[b-1],temp[b]=temp[b],temp[b-1]
-    if m=='r':
-        temp[b+1],temp[b]=temp[b],temp[b+1]
-    return temp
-src=[1,2,3,4,5,6,0,7,8]
-target=[1,2,3,4,5,6,7,8,0]
-bfs(src,target)
+import numpy as np
+from math import radians, sin, cos, sqrt, atan2
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import Pipeline
+from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
+
+# ---------- 1. Load data ----------
+file_path = 'uber.csv'   # adjust path if needed
+df = pd.read_csv(file_path)
+print("Initial rows:", len(df))
+print(df.head())
+
+# ---------- 2. Basic cleanup ----------
+# Drop unnamed index column(s) and 'key' if present
+cols_to_drop = [c for c in df.columns if c.lower().startswith('unnamed')]
+if 'key' in df.columns:
+    cols_to_drop.append('key')
+if cols_to_drop:
+    df = df.drop(columns=cols_to_drop)
+    print("Dropped columns:", cols_to_drop)
+
+# Keep only relevant columns if they exist. Adjust as needed.
+expected_cols = ['pickup_datetime', 'pickup_longitude', 'pickup_latitude',
+                 'dropoff_longitude', 'dropoff_latitude', 'passenger_count',
+                 'fare_amount']
+present = [c for c in expected_cols if c in df.columns]
+print("Present expected columns:", present)
+
+# Drop rows missing coordinates or fare or pickup_datetime
+df = df.dropna(subset=['pickup_longitude', 'pickup_latitude',
+                       'dropoff_longitude', 'dropoff_latitude',
+                       'fare_amount', 'pickup_datetime'])
+print("After dropping missing coords/fare/datetime:", len(df))
+
+# Ensure numeric types for coordinates and fare
+for col in ['pickup_longitude','pickup_latitude','dropoff_longitude','dropoff_latitude','fare_amount']:
+    df[col] = pd.to_numeric(df[col], errors='coerce')
+df = df.dropna(subset=['pickup_longitude','pickup_latitude','dropoff_longitude','dropoff_latitude','fare_amount'])
+print("After enforcing numeric types:", len(df))
+
+# ---------- 3. Haversine distance ----------
+def haversine(lat1, lon1, lat2, lon2):
+    # All args in decimal degrees
+    R = 6371.0  # km
+    lat1_r, lon1_r, lat2_r, lon2_r = map(radians, [lat1, lon1, lat2, lon2])
+    dlat = lat2_r - lat1_r
+    dlon = lon2_r - lon1_r
+    a = sin(dlat/2.0)**2 + cos(lat1_r) * cos(lat2_r) * sin(dlon/2.0)**2
+    c = 2 * atan2(sqrt(a), sqrt(1-a))
+    return R * c
+
+# Vectorized calculation (faster than apply)
+df['distance_km'] = df.apply(
+    lambda r: haversine(r['pickup_latitude'], r['pickup_longitude'],
+                        r['dropoff_latitude'], r['dropoff_longitude']),
+    axis=1
+)
+
+# ---------- 4. Datetime feature extraction ----------
+df['pickup_datetime'] = pd.to_datetime(df['pickup_datetime'], errors='coerce')
+df = df.dropna(subset=['pickup_datetime'])
+df['pickup_hour'] = df['pickup_datetime'].dt.hour
+df['pickup_day'] = df['pickup_datetime'].dt.day
+df['pickup_month'] = df['pickup_datetime'].dt.month
+df['pickup_dayofweek'] = df['pickup_datetime'].dt.dayofweek
+
+# If passenger_count exists, coerce to int
+if 'passenger_count' in df.columns:
+    df['passenger_count'] = pd.to_numeric(df['passenger_count'], errors='coerce').fillna(1).astype(int)
+else:
+    df['passenger_count'] = 1
+
+# ---------- 5. Simple outlier removal (domain knowledge) ----------
+print("\nBefore filtering outliers:", len(df))
+
+# Keep reasonably possible values
+df = df[(df['fare_amount'] > 0) & (df['fare_amount'] < 500)]
+df = df[(df['distance_km'] > 0) & (df['distance_km'] < 200)]  # 200 km upper generous cap
+df = df[(df['passenger_count'] > 0) & (df['passenger_count'] <= 6)]
+
+print("After domain-range filtering:", len(df))
+
+# ---------- 6. IQR method to detect outliers (report counts but keep after domain filters) ----------
+def iqr_outlier_count(series):
+    Q1 = series.quantile(0.25)
+    Q3 = series.quantile(0.75)
+    IQR = Q3 - Q1
+    lower = Q1 - 1.5 * IQR
+    upper = Q3 + 1.5 * IQR
+    return ((series < lower) | (series > upper)).sum()
+
+fare_outliers = iqr_outlier_count(df['fare_amount'])
+dist_outliers = iqr_outlier_count(df['distance_km'])
+print(f"IQR-based outliers -> fare_amount: {fare_outliers}, distance_km: {dist_outliers}")
+
+# If you want to remove IQR outliers uncomment below:
+# Q1 = df['fare_amount'].quantile(0.25); Q3 = df['fare_amount'].quantile(0.75)
+# IQR = Q3 - Q1
+# df = df[(df['fare_amount'] >= Q1 - 1.5*IQR) & (df['fare_amount'] <= Q3 + 1.5*IQR)]
+
+# ---------- 7. Correlation ----------
+corr_cols = ['fare_amount', 'distance_km', 'pickup_hour', 'pickup_dayofweek', 'passenger_count']
+available_corr_cols = [c for c in corr_cols if c in df.columns]
+correlation_matrix = df[available_corr_cols].corr()
+print("\nCorrelation matrix:\n", correlation_matrix)
+
+plt.figure(figsize=(8,6))
+sns.heatmap(correlation_matrix, annot=True, fmt=".2f", cmap='coolwarm')
+plt.title('Correlation Matrix')
+plt.show()
+
+# ---------- 8. Prepare features & target ----------
+features = ['distance_km', 'pickup_hour', 'passenger_count']
+X = df[features]
+y = df['fare_amount']
+
+# Optional: check for NA in X
+if X.isna().any().any():
+    X = X.fillna(0)
+
+# ---------- 9. Split ----------
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+print("\nTrain size:", len(X_train), "Test size:", len(X_test))
+
+# ---------- 10. Models: Linear Regression (with scaler) & Random Forest ----------
+linear_pipe = Pipeline([
+    ('scaler', StandardScaler()),
+    ('lr', LinearRegression())
+])
+
+rf_model = RandomForestRegressor(n_estimators=100, random_state=42, n_jobs=-1)
+
+# Train
+linear_pipe.fit(X_train, y_train)
+rf_model.fit(X_train, y_train)
+
+# Predict
+lr_pred = linear_pipe.predict(X_test)
+rf_pred = rf_model.predict(X_test)
+
+# Metrics function
+def print_metrics(y_true, y_pred, name="Model"):
+    r2 = r2_score(y_true, y_pred)
+    rmse = np.sqrt(mean_squared_error(y_true, y_pred))
+    mae = mean_absolute_error(y_true, y_pred)
+    print(f"{name} -> R2: {r2:.4f} | RMSE: {rmse:.4f} | MAE: {mae:.4f}")
+    return r2, rmse, mae
+
+print("\nEvaluation results:")
+lr_r2, lr_rmse, lr_mae = print_metrics(y_test, lr_pred, "Linear Regression")
+rf_r2, rf_rmse, rf_mae = print_metrics(y_test, rf_pred, "Random Forest")
+
+# Feature importances for RF
+try:
+    importances = rf_model.feature_importances_
+    for f, imp in zip(features, importances):
+        print(f"RF feature importance - {f}: {imp:.4f}")
+except Exception:
+    pass
+
+# Optional: show a few predictions vs actual
+comparison = pd.DataFrame({
+    'actual': y_test.values,
+    'lr_pred': lr_pred,
+    'rf_pred': rf_pred,
+    'distance_km': X_test['distance_km'].values,
+    'pickup_hour': X_test['pickup_hour'].values
+})
+print("\nSample of predictions (first 10 rows):")
+print(comparison.head(10))
+
+# ---------- 11. Quick conclusion print ----------
+print("\nConclusion:")
+if rf_r2 > lr_r2:
+    print("Random Forest performed better based on R2.")
+else:
+    print("Linear Regression performed better based on R2.")
+print("Compare RMSE and MAE to decide model for production/use-case.")
