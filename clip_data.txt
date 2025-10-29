@@ -1,103 +1,3 @@
-# Import required libraries
-
-import pandas as pd
-
-import numpy as np
-
-import matplotlib.pyplot as plt
-
-import seaborn as sns
-
-from sklearn.model selection import train test split
-
-from sklearn.preprocessing import StandardScaler
-
-from sklearn.metrics import accuracy_score, confusion_matrix
-
-from sklearn.neural network import MLPClassifier
-
-#1. Read the dataset
-
-url = "C:/Users/palla/OneDrive/Desktop/Bank/Churn Modelling.csv" #
-
-Local path to your dataset
-
-dataset = pd.read_csv(url)
-
-#2. Check for missing values (optional)
-
-print(dataset.isnull().sum()) # To check if there are any missing values
-
-#3. Handle categorical variables (Geography, Gender)
-
-Department of Computer Science and Engineering
-
-Fonjya Doddappa Appa College of Engineering. Kalaburagi
-
-ARTIFICIAL INTELLIGENCE AND MACHINE LEARNING LAB
-
-# Use one-hot encoding to convert categorical variables to numeric values dataset = pd.get_dummies(dataset, columns=['Geography', 'Gender'], drop first-True)
-
-#4. Distinguish the feature and target set
-
-X = dataset.drop(columns=['Exited', 'Customerld', 'Surname']) # Dropping non-useful columns like 'CustomerId' and 'Surname' y = dataset['Exited'] # 'Exited' is the target variable (1 = Churn, 0 = No Churn)
-
-#5. Split the data into training and test sets
-
-X_train, X_test, y_train, y_test train_test_split(X, y, test_size=0.2, random state=42)
-
-#6. Normalize the train and test data
-
-scaler StandardScaler()
-
-X train scaled scaler.fit transform(X train)
-
-X_test scaled scaler.transform(X_test)
-
-#7. Initialize and build the model using MLPClassifier
-
-model MLPClassifier(hidden layer sizes-(128, 64, 32), max iter-1000, activation 'relu', solver-'adam', random state=42)
-
-#8. Train the model
-
-model.fit(X_train scaled, y train)
-
-#9. Predict on the test set
-
-y_pred model.predict(X_test_scaled)
-
-30/39
-
-#10. Print the accuracy score
-
-accuracy accuracy_score(y_test, y_pred)
-
-print(f"Accuracy: {accuracy 100:.2f}%")
-
-#11. Print the confusion matrix
-
-em confusion_matrix(y_test, y_pred)
-
-print("Confusion Matrix:")
-print(cm)
-
-#12. Visualization of the confusion matrix
-
-plt.figure(figsize=(8, 6))
-
-sns.heatmap(cm, annot True, fmt='d', cmap='Blues', xticklabels=['No
-
-Churn', 'Churn'], yticklabels=['No Churn', 'Churn'])
-
-plt.title('Confusion Matrix')
-
-plt.xlabel('Predicted')
-
-plt.ylabel('Actual')
-
-plt.show()
-
-
 10.Given a bank customer, build a neural network-based classifier 
 that can determine whether they will leave or not in the next 6 
 months. Dataset Description: The case study is from an open-
@@ -111,4 +11,21 @@ into training and test sets.
 3. Normalize the train and test data. 
 4. Initialize and build the model. Identify the points of 
 improvement and implement the same. 5. Print the accuracy 
-score and confusion matrix (5 points)
+score and confusion matrix (5 points) 
+Program code:
+# Import required libraries
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import accuracy_score, confusion_matrix
+from sklearn.neural_network import MLPClassifier
+# 1. Read the dataset
+url = "C:/Users/palla/OneDrive/Desktop/Bank/Churn_Modelling.csv" # 
+Local path to your dataset
+dataset = pd.read_csv(url)
+# 2. Check for missing values (optional)
+print(dataset.isnull().sum()) # To check if there are any missing values
+# 3. Handle categorical variables (Geography, Gender)
