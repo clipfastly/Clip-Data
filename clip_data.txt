@@ -29,3 +29,40 @@ dataset = pd.read_csv(url)
 # 2. Check for missing values (optional)
 print(dataset.isnull().sum()) # To check if there are any missing values
 # 3. Handle categorical variables (Geography, Gender)
+# Use one-hot encoding to convert categorical variables to numeric values
+dataset = pd.get_dummies(dataset, columns=['Geography', 'Gender'], 
+drop_first=True)
+# 4. Distinguish the feature and target set
+X = dataset.drop(columns=['Exited', 'CustomerId', 'Surname']) # Dropping 
+non-useful columns like 'CustomerId' and 'Surname'
+y = dataset['Exited'] # 'Exited' is the target variable (1 = Churn, 0 = No 
+Churn)
+# 5. Split the data into training and test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, 
+random_state=42)
+# 6. Normalize the train and test data
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+# 7. Initialize and build the model using MLPClassifier
+model = MLPClassifier(hidden_layer_sizes=(128, 64, 32), max_iter=1000, 
+activation='relu', solver='adam', random_state=42)
+# 8. Train the model
+model.fit(X_train_scaled, y_train)
+# 9. Predict on the test set
+y_pred = model.predict(X_test_scaled)
+# 10. Print the accuracy score
+accuracy = accuracy_score(y_test, y_pred)
+print(f"Accuracy: {accuracy * 100:.2f}%")
+# 11. Print the confusion matrix
+cm = confusion_matrix(y_test, y_pred)
+print("Confusion Matrix:")
+print(cm)
+# 12. Visualization of the confusion matrix
+plt.figure(figsize=(8, 6))
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=['No 
+Churn', 'Churn'], yticklabels=['No Churn', 'Churn'])
+plt.title('Confusion Matrix')
+plt.xlabel('Predicted')
+plt.ylabel('Actual')
+plt.show()
