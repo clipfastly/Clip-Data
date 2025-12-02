@@ -1,226 +1,342 @@
-10.Given a bank customer, build a neural network-based classifier 
-that can determine whether they will leave or not in the next 6 
-months. Dataset Description: The case study is from an open-
-source dataset from Kaggle. The dataset contains 10,000 sample 
-points with 14 distinct features such as CustomerId, CreditScore, 
-Geography, Gender, Age, Tenure, Balance, etc. Perform following 
-steps: 
-1. Read the dataset. 
-2. Distinguish the feature and target set and divide the data set 
-into training and test sets. 
-3. Normalize the train and test data. 
-4. Initialize and build the model. Identify the points of 
-improvement and implement the same. 5. Print the accuracy 
-score and confusion matrix (5 points) 
-Program code:
-# Import required libraries
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import accuracy_score, confusion_matrix
-from sklearn.neural_network import MLPClassifier
-# 1. Read the dataset
-url = "C:/Users/palla/OneDrive/Desktop/Bank/Churn_Modelling.csv" # 
-Local path to your dataset
-dataset = pd.read_csv(url)
-# 2. Check for missing values (optional)
-print(dataset.isnull().sum()) # To check if there are any missing values
-# 3. Handle categorical variables (Geography, Gender)
-# Use one-hot encoding to convert categorical variables to numeric values
-dataset = pd.get_dummies(dataset, columns=['Geography', 'Gender'], 
-drop_first=True)
-# 4. Distinguish the feature and target set
-X = dataset.drop(columns=['Exited', 'CustomerId', 'Surname']) # Dropping 
-non-useful columns like 'CustomerId' and 'Surname'
-y = dataset['Exited'] # 'Exited' is the target variable (1 = Churn, 0 = No 
-Churn)
-# 5. Split the data into training and test sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, 
-random_state=42)
-# 6. Normalize the train and test data
-scaler = StandardScaler()
-X_train_scaled = scaler.fit_transform(X_train)
-X_test_scaled = scaler.transform(X_test)
-# 7. Initialize and build the model using MLPClassifier
-model = MLPClassifier(hidden_layer_sizes=(128, 64, 32), max_iter=1000, 
-activation='relu', solver='adam', random_state=42)
-# 8. Train the model
-model.fit(X_train_scaled, y_train)
-# 9. Predict on the test set
-y_pred = model.predict(X_test_scaled)
-# 10. Print the accuracy score
-accuracy = accuracy_score(y_test, y_pred)
-print(f"Accuracy: {accuracy * 100:.2f}%")
-# 11. Print the confusion matrix
-cm = confusion_matrix(y_test, y_pred)
-print("Confusion Matrix:")
-print(cm)
-# 12. Visualization of the confusion matrix
-plt.figure(figsize=(8, 6))
-sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=['No 
-Churn', 'Churn'], yticklabels=['No Churn', 'Churn'])
-plt.title('Confusion Matrix')
-plt.xlabel('Predicted')
-plt.ylabel('Actual')
-plt.show()
 
+# 1. Program: Tic-Tac-Toe Game
+
+
+# Function to print the Tic-Tac-Toe board
+def print_board(board):
+    for row in board:
+        print(" | ".join(row))
+    print("-" * 9)
+
+# Function to check if the current player has won
+def check_winner(board, player):
+    # Check rows and columns
+    for i in range(3):
+        if all(board[i][j] == player for j in range(3)):  # Check each row
+            return True
+        if all(board[j][i] == player for j in range(3)):  # Check each column
+            return True
+
+    # Check both diagonals
+    if all(board[i][i] == player for i in range(3)) or all(board[i][2 - i] == player for i in range(3)):
+        return True
+
+    return False  # No winning condition yet
+
+# Function to check if the board is full (for draw)
+def is_board_full(board):
+    for row in board:
+        if " " in row:
+            return False
+    return True
+
+# Main function
+def main():
+    board = [[" " for _ in range(3)] for _ in range(3)]  # Create 3x3 board
+    players = ["X", "O"]
+    turn = 0
+
+    print("Welcome to Tic-Tac-Toe Game!\n")
+    print_board(board)
+
+    while True:
+        player = players[turn % 2]  # Alternates between X and O
+        print(f"Player {player}'s turn")
+
+        # Take input for row and column
+        row = int(input("Enter row (0, 1, or 2): "))
+        col = int(input("Enter column (0, 1, or 2): "))
+
+        # Check if the cell is empty
+        if board[row][col] == " ":
+            board[row][col] = player  # Place player's move
+            print_board(board)
+
+            # Check for a winner
+            if check_winner(board, player):
+                print(f"Player {player} wins! 🎉")
+                break
+            # Check for a draw
+            elif is_board_full(board):
+                print("It's a draw! 🤝")
+                break
+
+            turn += 1  # Switch turn
+        else:
+            print("Cell already occupied! Try again.\n")
+
+# Run the main function
+if __name__ == "_main_":
+    main()
 
 ---------------------------------------------------------------------------------------------------------------
 
-# %%
-import numpy as np
-import matplotlib.pyplot as plt
-# %%
-def func(x):
- return (x + 3) ** 2
-# %%
-def grad_func(x):
- return 2 * (x + 3)
-# %%
-# Gradient Descent Algorithm
-def gradient_descent(starting_point, learning_rate, num_iterations):
- x = starting_point
- x_history = [x] # Keep track of x values for plotting
- for _ in range(num_iterations):
- # Calculate gradient
- gradient = grad_func(x)
- # Update x by moving against the gradient
- x = x - learning_rate * gradient
- # Append the new x value to history
- x_history.append(x)
- return x, x_history
-# %%
-# Parameters for gradient descent
-starting_point = 2 # Starting point x = 2
-learning_rate = 0.1 # Learning rate
-num_iterations = 20 # Number of iterations
-# %%
-final_x, x_history = gradient_descent(starting_point, learning_rate, 
-num_iterations)
-# %%
-print(f"Final x value after {num_iterations} iterations: {final_x}")
-print(f"Minimum value of the function: {func(final_x)}")
-# %%
-x_vals = np.linspace(-10, 5, 100)
-y_vals = func(x_vals)
-# %%
-plt.figure(figsize=(8, 6))
-plt.plot(x_vals, y_vals, label='y = (x + 3)^2', color='blue')
-plt.scatter(x_history, [func(x) for x in x_history], color='red', 
-label='Gradient Descent Path')
-plt.plot(x_history, [func(x) for x in x_history], color='red', 
-linestyle='dashed', alpha=0.6)
-plt.title('Gradient Descent to Find Local Minima')
-plt.xlabel('x')
-plt.ylabel('y')
-plt.legend()
-plt.grid(True)
-plt.show()
 
-11.Implement Gradient Descent Algorithm to find the local minima of 
-a function. For example, find the local minima of the function 
-y=(x+3)² starting from the point x=2.
+# Water Jug Problem using simple rules
+
+x = 0   # Current amount of water in jug X (capacity 4)
+y = 0   # Current amount of water in jug Y (capacity 3)
+m = 4   # Capacity of jug X
+n = 3   # Capacity of jug Y
+
+print("Initial state = (0, 0)")
+print("Capacities = (4, 3)")
+print("Goal state = (2, y)")
+
+while x != 2:   # Continue until jug X has 2 liters
+    r = int(input("Enter the rule (1-8): "))
+
+    if r == 1:      # Fill jug X completely
+        x = m
+    elif r == 2:    # Fill jug Y completely
+        y = n
+    elif r == 3:    # Empty jug X
+        x = 0
+    elif r == 4:    # Empty jug Y
+        y = 0
+    elif r == 5:    # Pour water from Y into X until X is full or Y is empty
+        t = min(n - y, x)
+        y = y + t
+        x = x - t
+    elif r == 6:    # Pour water from X into Y until Y is full or X is empty
+        t = min(m - x, y)
+        x = x + t
+        y = y - t
+    elif r == 7:    # Pour all water from X into Y
+        y += x
+        x = 0
+    elif r == 8:    # Pour all water from Y into X
+        x += y
+        y = 0
+    else:
+        print("Invalid rule")
+
+    print(f"Current state: ({x}, {y})")
+
+print("Goal reached!")
+
 
 -----------------------------------------------------------------------------------------------------------------------------------------
 
+# 3. 8 Puzzle Program
 
-# 12.Implement K-Nearest Neighbors algorithm on diabetes.csv
-# dataset. Compute confusion matrix, accuracy, error rate, precision
-# and recall on the given dataset.
-# Program Code:
 
+# Importing required libraries
+import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.metrics import confusion_matrix, accuracy_score,precision_score, recall_score
-# Step 1: Load the dataset
-dataset = pd.read_csv("diabetes.csv")
-# Step 2: Preprocess the data (fill missing values if any)
-dataset.fillna(dataset.median(), inplace=True)
-# Step 3: Define the feature set X and target variable y
-X = dataset.drop("Outcome", axis=1) # Features
-y = dataset["Outcome"] # Target variable
-# Step 4: Split the data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,
-random_state=42)
-# Step 5: Initialize and train the KNN model
-knn = KNeighborsClassifier(n_neighbors=5) 
-# You can experiment with different k-values
-knn.fit(X_train, y_train)
-# Step 6: Make predictions
-y_pred = knn.predict(X_test)
-# Step 7: Compute evaluation metrics
-cm = confusion_matrix(y_test, y_pred)
-accuracy = accuracy_score(y_test, y_pred)
-error_rate = 1 - accuracy
-precision = precision_score(y_test, y_pred)
-recall = recall_score(y_test, y_pred)
-# Output results
-print("Confusion Matrix:\n", cm)
-print("Accuracy:", accuracy)
-print("Error Rate:", error_rate)
-print("Precision:", precision)
-print("Recall:", recall)
+import os
+
+# Breadth First Search (BFS) function
+def bfs(src, target):
+    queue = []              # List to store states to be explored
+    explored = []           # List to store already visited states
+
+    queue.append(src)       # Add the starting state to the queue
+
+    while len(queue) > 0:   # Repeat until queue becomes empty
+        state = queue.pop(0)    # Take the first state from the queue
+        explored.append(state)  # Mark it as explored
+        print(state)            # Print the current state
+
+        if state == target:     # If we reached the goal
+            print("Success! Target state reached.")
+            return
+
+        # Find all possible next moves from the current state
+        for move in possible_moves(state, explored):
+            if move not in explored and move not in queue:
+                queue.append(move)   # Add new states to queue for exploring
+
+# Function to find possible moves from a given state
+def possible_moves(state, visited_states):
+    pos = state.index(0)    # Find the position of the empty tile (0)
+    moves = []              # List to store allowed moves
+
+    # Based on the empty tile position, decide possible directions
+    if pos not in [0, 1, 2]: moves.append('u')   # Can move up
+    if pos not in [6, 7, 8]: moves.append('d')   # Can move down
+    if pos not in [0, 3, 6]: moves.append('l')   # Can move left
+    if pos not in [2, 5, 8]: moves.append('r')   # Can move right
+
+    # Generate new states based on valid moves
+    new_states = []
+    for m in moves:
+        new_states.append(generate(state, m, pos))
+
+    # Return only new states not already visited
+    return [s for s in new_states if s not in visited_states]
+
+# Function to generate new state after a move
+def generate(state, move, pos):
+    temp = state.copy()     # Copy current state to modify safely
+
+    # Swap the blank tile (0) based on the move direction
+    if move == 'u': temp[pos-3], temp[pos] = temp[pos], temp[pos-3]
+    if move == 'd': temp[pos+3], temp[pos] = temp[pos], temp[pos+3]
+    if move == 'l': temp[pos-1], temp[pos] = temp[pos], temp[pos-1]
+    if move == 'r': temp[pos+1], temp[pos] = temp[pos], temp[pos+1]
+
+    return temp
+
+# Starting and target states
+src = [1, 2, 3, 4, 5, 6, 0, 7, 8]
+target = [1, 2, 3, 4, 5, 6, 7, 8, 0]
+
+# Run BFS search
+bfs(src, target)
+
 
 ------------------------------------------------------------------------------------------------------------------
 
 
-# 13.Implement K-Means clustering/ hierarchical clustering on
-# sales_data_sample.csv dataset. Determine the number of clusters using
-# the elbow method.
-# Program code:
 
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt # type: ignore
-from sklearn.cluster import KMeans
-from sklearn.preprocessing import StandardScaler
-# Step 1: Load and Preprocess the Data
-url = 'C:/Users/palla/OneDrive/Desktop/pro/k means/sales_data_sample.csv'
-# Read the file with proper encoding
-data = pd.read_csv(url,encoding='latin1') # Removed 'errors'argument
-# Display column names to verify
-print("Columns in Dataset:")
-print(data.columns)
-# Selecting relevant columns for clustering
-# Update these column names based on your dataset structure
-data_selected = data[['QUANTITYORDERED', 'PRICEEACH','SALES']] # Replace with actual column names
-# Handle missing values by filling with the mean
-data_selected = data_selected.fillna(data_selected.mean())
-# Normalize the data (important for K-Means)
-scaler = StandardScaler()
-data_normalized = scaler.fit_transform(data_selected)
-# Step 2: Determine the Optimal Number of Clusters using the Elbow Method (for K-Means)
+#4. AO* Algorithm Implementation (Simplified and Correct)
 
-inertia = []
-for k in range(1, 11): # Trying k values from 1 to 10
- kmeans = KMeans(n_clusters=k, random_state=42)
- kmeans.fit(data_normalized)
- inertia.append(kmeans.inertia_)
-# Plot the inertia to visualize the Elbow point
-plt.figure(figsize=(8, 6))
-plt.plot(range(1, 11), inertia, marker='o')
-plt.title('Elbow Method for Optimal k')
-plt.xlabel('Number of Clusters (k)')
-plt.ylabel('Inertia (Within-cluster sum of squares)')
-plt.show()
-# From the plot, look for the "elbow" point where inertia starts decreasing slowly
-optimal_k = 4 # Replace with the value determined from the plot
-# Step 3: K-Means Clustering
-kmeans = KMeans(n_clusters=optimal_k, random_state=42)
-kmeans_labels = kmeans.fit_predict(data_normalized)
-# Add the K-Means cluster labels to the dataset
-data['KMeans_Cluster'] = kmeans_labels
-# Step 4: Visualize the Clusters
-plt.scatter(data['SALES'], data['QUANTITYORDERED'],
-c=data['KMeans_Cluster'], cmap='viridis')
-plt.title('K-Means Clustering (Sales vs Quantity Ordered)')
-plt.xlabel('Sales')
-plt.ylabel('Quantity Ordered')
-plt.show()
+class Node:
+    def _init_(self, name, heuristic, is_goal=False):
+        self.name = name               # Node name
+        self.heuristic = heuristic     # Estimated cost (heuristic value)
+        self.is_goal = is_goal         # True if this node is a goal
+        self.children = []             # Child node sets (AND/OR)
+        self.marked = False            # Marked means part of the optimal path
+
+    def add_children(self, *child_sets):
+        # Each child_set is a list of children (representing AND/OR groups)
+        self.children.extend(child_sets)
+
+def ao_star(node, path_cost=1):
+    """AO* Search: Finds minimum cost path"""
+    if node.is_goal:              # If goal reached
+        node.marked = True
+        return node.heuristic
+
+    if not node.children:         # If no children, return heuristic value
+        return node.heuristic
+
+    min_cost = float('inf')
+    best_child_set = None
+
+    # Check each child set (AND/OR combinations)
+    for child_set in node.children:
+        cost = 0
+        for child in child_set:
+            # Total cost = heuristic + path cost
+            cost += child.heuristic + path_cost
+            if not child.marked:
+                cost += ao_star(child, path_cost)
+
+        # Update best (minimum) cost and best set
+        if cost < min_cost:
+            min_cost = cost
+            best_child_set = child_set
+
+    # Mark the best path
+    if best_child_set:
+        node.marked = True
+        for child in best_child_set:
+            child.marked = True
+
+    return min_cost
+
+# --- Create nodes ---
+A = Node('A', 6)
+B = Node('B', 4)
+C = Node('C', 2)
+D = Node('D', 0, is_goal=True)
+E = Node('E', 0, is_goal=True)
+F = Node('F', 0, is_goal=True)
+G = Node('G', 0, is_goal=True)
+
+# --- Define AND/OR relationships ---
+A.add_children([B], [C])      # A → B OR C
+B.add_children([D], [E])      # B → D OR E
+C.add_children([F], [G])      # C → F OR G
+
+# --- Run AO* algorithm ---
+print("Running AO* algorithm...")
+total_cost = ao_star(A)
+print("Optimal solution path cost:", total_cost)
+
+# --- Display the optimal path ---
+def display_solution_path(node):
+    if node.marked:
+        print(node.name, end=" ")
+        for child_set in node.children:
+            for child in child_set:
+                display_solution_path(child)
+
+print("\nOptimal solution path:")
+display_solution_path(A)
+
+
+------------------------------------------------------------------------------------------------------------------------
+
+
+#5. Find S
+
+import csv   # Used to read CSV files
+
+num_attributes = 6   # Total number of attributes (columns)
+
+# Open and read the dataset file
+with open('enjoysport.csv', 'r') as file:
+    reader = csv.reader(file)
+    data = list(reader)
+
+# Assume first positive example as the initial hypothesis
+hypothesis = data[1][:-1]
+
+# Go through each training example
+for row in data:
+    if row[-1].lower() == 'yes':        # Check if example is positive
+        for j in range(num_attributes): # Compare each attribute
+            if row[j] != hypothesis[j]: # If different, replace with '?'
+                hypothesis[j] = '?'
+
+# Display final hypothesis
+print("\nThe maximally specific hypothesis is:\n")
+print(hypothesis)
+
+
+------------------------------------------------------------------------------------------------------------------------
+
+
+# 6. Candidate Elimination
+import csv
+
+# Step 1: Read the training data file
+with open('trainingdata.csv', 'r') as f:
+    reader = csv.reader(f)
+    data = list(reader)
+
+# Step 2: Initialize S (specific hypothesis) as the first positive example
+s = data[1][:-1]  # Ignore last column (target value)
+print("Initial Specific Hypothesis:", s)
+
+# Step 3: Initialize G (general hypothesis) with most general values
+g = [['?' for _ in range(len(s))]]
+print("Initial General Hypothesis:", g)
+
+# Step 4: Loop through each training example
+for i in data:
+    if i[-1].lower() == "yes":  # Positive example
+        for j in range(len(s)):
+            if i[j] != s[j]:     # If attribute differs, make it '?'
+                s[j] = '?'
+    elif i[-1].lower() == "no":  # Negative example
+        for j in range(len(s)):
+            if s[j] != '?' and s[j] == i[j]:
+                g[0][j] = '?'
+
+    # Print intermediate steps
+    print("\nStep", data.index(i)+1)
+    print("Specific Hypothesis:", s)
+    print("General Hypothesis:", g)
+
+# Step 5: Display final hypotheses
+print("\nFinal Specific Hypothesis:", s)
+print("Final General Hypothesis:", g)
+
 
 ------------------------------------------------------------------------------------------------------------------------
 
@@ -295,7 +411,7 @@ int main()
 }
 
 
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 // Server Program
 
