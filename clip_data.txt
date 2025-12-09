@@ -1,4 +1,383 @@
 
+#8.  Decision Based IDE3
+
+
+from sklearn.tree import DecisionTreeClassifier # type: ignore
+from sklearn.preprocessing import LabelEncoder # type: ignore
+import pandas as pd # type: ignore
+
+
+# Read dataset
+data = pd.read_csv('m.csv')
+print("First 5 values of data:\n", data.head())
+
+# Split input (X) and output (y)
+x = data.iloc[:, :-1].copy()   # all columns except last
+y = data.iloc[:, -1]           # last column (PlayTennis)
+print("\nValues of X:\n", x.head())
+print("\nFirst 5 values of y:\n", y.head())
+
+# Create label encoders for each column
+le_Outlook = LabelEncoder()
+le_Temperature = LabelEncoder()
+le_Humidity = LabelEncoder()
+le_Windy = LabelEncoder()
+le_PlayTennis = LabelEncoder()
+
+# Encode input features (convert strings to numbers)
+x['Outlook'] = le_Outlook.fit_transform(x['Outlook'])
+x['Temperature'] = le_Temperature.fit_transform(x['Temperature'])
+x['Humidity'] = le_Humidity.fit_transform(x['Humidity'])
+x['Windy'] = le_Windy.fit_transform(x['Windy'])
+
+# Encode output labels
+y = le_PlayTennis.fit_transform(y)
+
+print("\nEncoded train data X:\n", x.head())
+print("\nEncoded train output y:\n", y)
+
+# Build Decision Tree using ID3 (entropy)
+classifier = DecisionTreeClassifier(criterion='entropy')
+classifier.fit(x, y)
+
+# New test input
+inp = ["overcast", "cool", "normal", "strong"]
+inp_df = pd.DataFrame([inp],
+                    columns=['Outlook', 'Temperature', 'Humidity', 'Windy'])
+
+# Encode test input using same encoders
+inp_df['Outlook'] = le_Outlook.transform(inp_df['Outlook'])
+inp_df['Temperature'] = le_Temperature.transform(inp_df['Temperature'])
+inp_df['Humidity'] = le_Humidity.transform(inp_df['Humidity'])
+inp_df['Windy'] = le_Windy.transform(inp_df['Windy'])
+
+# Predict and convert back to label
+y_pred = classifier.predict(inp_df)
+predicted_label = le_PlayTennis.inverse_transform(y_pred)[0]
+
+print("\nFor input {0} we obtain {1}".format(inp, predicted_label))
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+#9. Email Binary Classifier
+
+
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder, StandardScaler
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report
+
+# 1. Load dataset
+data = pd.read_csv('emails.csv')
+print("Dataset Head:\n", data.head())
+
+# 2. Encode target labels (Spam = 1, Not Spam = 0)
+label_encoder = LabelEncoder()
+data['Prediction'] = label_encoder.fit_transform(data['Prediction'])
+
+# 3. Drop unnecessary column
+data = data.drop(columns=['Email No.'])
+
+# 4. Split into Features (X) and Target (y)
+X = data.drop(columns=['Prediction'])
+y = data['Prediction']
+
+# 5. Train-test split
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# 6. Feature Scaling (required for both KNN & SVM)
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+# 7. Train K-Nearest Neighbors (KNN)
+knn = KNeighborsClassifier(n_neighbors=5)
+knn.fit(X_train, y_train)
+y_pred_knn = knn.predict(X_test)
+
+# 8. Train Support Vector Machine (SVM)
+svm = SVC(kernel='linear', random_state=42)
+svm.fit(X_train, y_train)
+y_pred_svm = svm.predict(X_test)
+
+# 9. Evaluation Function
+def evaluate_model(y_test, y_pred, name):
+    print(f"\n{name} Performance:")
+    print("Accuracy :", accuracy_score(y_test, y_pred))
+    print("Precision:", precision_score(y_test, y_pred))
+    print("Recall   :", recall_score(y_test, y_pred))
+    print("F1 Score :", f1_score(y_test, y_pred))
+    print("\nClassification Report:\n", classification_report(y_test, y_pred))
+
+# 10. Print Results for Both Models
+evaluate_model(y_test, y_pred_knn, "K-Nearest Neighbors (KNN)")
+evaluate_model(y_test, y_pred_svm, "Support Vector Machine (SVM)")
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#10. Bank Customer
+
+
+# 0. Import required libraries
+import pandas as pd # type: ignore
+import numpy as np # type: ignore
+import matplotlib.pyplot as plt # type: ignore
+import seaborn as sns # type: ignore
+
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import accuracy_score, confusion_matrix
+from sklearn.neural_network import MLPClassifier
+
+# 1. Read the dataset
+data = pd.read_csv("Churn_Modelling.csv")
+print("First 5 rows:\n", data.head())
+
+# (optional) Check missing values
+print("\nMissing values in each column:\n", data.isnull().sum())
+
+# 2. Handle categorical variables (Geography, Gender) using one-hot encoding
+data = pd.get_dummies(data, columns=['Geography', 'Gender'], drop_first=True)
+
+# 3. Distinguish feature set (X) and target set (y)
+X = data.drop(columns=['Exited', 'CustomerId', 'Surname'])
+y = data['Exited']   # 1 = Churn, 0 = No Churn
+
+# 4. Split the data into training and test sets
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# 5. Normalize the train and test data
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# 6. Initialize and build the neural network model (MLPClassifier)
+# Improvement points: multiple hidden layers, ReLU activation, Adam optimizer, scaled data
+model = MLPClassifier(
+    hidden_layer_sizes=(128, 64, 32),
+    activation='relu',
+    solver='adam',
+    max_iter=1000,
+    random_state=42
+)
+
+# 7. Train the model
+model.fit(X_train_scaled, y_train)
+
+# 8. Predict on the test set
+y_pred = model.predict(X_test_scaled)
+
+# 9. Print the accuracy score
+accuracy = accuracy_score(y_test, y_pred)
+print(f"\nAccuracy: {accuracy * 100:.2f}%")
+
+# 10. Print the confusion matrix
+cm = confusion_matrix(y_test, y_pred)
+print("\nConfusion Matrix:")
+print(cm)
+
+# 11. Visualize the confusion matrix
+plt.figure(figsize=(6, 4))
+sns.heatmap(
+    cm,
+    annot=True,
+    fmt='d',
+    cmap='Blues',
+    xticklabels=['No Churn', 'Churn'],
+    yticklabels=['No Churn', 'Churn']
+)
+plt.title('Confusion Matrix')
+plt.xlabel('Predicted')
+plt.ylabel('Actual')
+plt.show()
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+#11.  Gradient descent algo
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Function: y = (x + 3)^2
+def func(x):
+    return (x + 3) ** 2
+
+# Derivative of the function: dy/dx = 2(x + 3)
+def grad_func(x):
+    return 2 * (x + 3)
+
+# Gradient Descent Algorithm
+def gradient_descent(starting_point, learning_rate, num_iterations):
+    x = starting_point
+    x_history = [x]  # store all x values to plot the path
+
+    for _ in range(num_iterations):
+        gradient = grad_func(x)               # compute slope at current x
+        x = x - learning_rate * gradient      # move opposite to slope
+        x_history.append(x)                   # save new x
+
+    return x, x_history
+
+# Parameters
+starting_point = 2       # start at x = 2
+learning_rate = 0.1      # step size
+num_iterations = 20      # number of updates
+
+# Run gradient descent
+final_x, x_history = gradient_descent(starting_point, learning_rate, num_iterations)
+
+print(f"Final x after {num_iterations} iterations: {final_x}")
+print(f"Minimum value of function: {func(final_x)}")
+
+# Plot function and descent path
+x_vals = np.linspace(-10, 5, 100)
+y_vals = func(x_vals)
+
+plt.figure(figsize=(8, 6))
+plt.plot(x_vals, y_vals, label='y = (x + 3)^2')
+plt.scatter(x_history, [func(x) for x in x_history], color='red', label='Descent path')
+plt.plot(x_history, [func(x) for x in x_history], color='red', linestyle='dashed', alpha=0.6)
+plt.title('Gradient Descent to Find Local Minimum')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#12. KNN Diabeties
+
+
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score
+
+# 1. Load dataset
+dataset = pd.read_csv("diabetes.csv")
+print("Dataset Loaded Successfully")
+
+# 2. Preprocess data (fill missing values if any)
+dataset.fillna(dataset.median(), inplace=True)
+
+# 3. Create feature matrix (X) and target vector (y)
+X = dataset.drop("Outcome", axis=1)   # all columns except Outcome
+y = dataset["Outcome"]                # 1 = diabetic, 0 = not diabetic
+
+# 4. Train-test split (70% training, 30% testing)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42
+)
+
+# 5. Train KNN classifier
+knn = KNeighborsClassifier(n_neighbors=5)  # K = 5
+knn.fit(X_train, y_train)
+
+# 6. Predict the output
+y_pred = knn.predict(X_test)
+
+# 7. Compute evaluation metrics
+cm = confusion_matrix(y_test, y_pred)
+accuracy = accuracy_score(y_test, y_pred)
+error_rate = 1 - accuracy
+precision = precision_score(y_test, y_pred)
+recall = recall_score(y_test, y_pred)
+
+# 8. Print results
+print("\nConfusion Matrix:\n", cm)
+print("Accuracy      :", accuracy)
+print("Error Rate    :", error_rate)
+print("Precision     :", precision)
+print("Recall        :", recall)
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#13. K means clustering
+
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+
+# 1. Load the dataset
+# If file is in same folder, just use: "sales_data_sample.csv"
+data = pd.read_csv("sales_data_sample.csv", encoding="latin1")
+print("Columns in dataset:\n", data.columns)
+
+# 2. Select relevant numeric columns for clustering
+# Use the actual column names present in your CSV
+data_selected = data[['QUANTITYORDERED', 'PRICEEACH', 'SALES']]
+
+# 3. Handle missing values (if any)
+data_selected = data_selected.fillna(data_selected.mean())
+
+# 4. Normalize (standardize) the data
+scaler = StandardScaler()
+data_normalized = scaler.fit_transform(data_selected)
+
+# 5. Elbow Method to find optimal number of clusters (k)
+inertia = []
+K_range = range(1, 11)  # Try k from 1 to 10
+
+for k in K_range:
+    kmeans = KMeans(n_clusters=k, random_state=42)
+    kmeans.fit(data_normalized)
+    inertia.append(kmeans.inertia_)  # sum of squared distances to cluster center
+
+# Plot the Elbow curve
+plt.figure(figsize=(8, 6))
+plt.plot(K_range, inertia, marker='o')
+plt.title('Elbow Method for Optimal k')
+plt.xlabel('Number of Clusters (k)')
+plt.ylabel('Inertia (Within-cluster sum of squares)')
+plt.grid(True)
+plt.show()
+
+# 6. Choose k based on Elbow (example: k = 4)
+optimal_k = 4  # replace this after seeing elbow plot
+
+# 7. Apply K-Means with optimal_k
+kmeans = KMeans(n_clusters=optimal_k, random_state=42)
+kmeans_labels = kmeans.fit_predict(data_normalized)
+
+# Add cluster labels to original data
+data['KMeans_Cluster'] = kmeans_labels
+
+# 8. Visualize clusters (Sales vs Quantity Ordered)
+plt.figure(figsize=(8, 6))
+plt.scatter(
+    data['SALES'],
+    data['QUANTITYORDERED'],
+    c=data['KMeans_Cluster'],
+    cmap='viridis'
+)
+plt.title('K-Means Clustering (Sales vs Quantity Ordered)')
+plt.xlabel('Sales')
+plt.ylabel('Quantity Ordered')
+plt.grid(True)
+plt.show()
+
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
 
 // Sliding_Window_protocols
 
