@@ -2,6 +2,63 @@
 
 
 
+
+import cv2
+import numpy as np
+image1 = cv2.imread('tri1.jpg')
+image2 = cv2.imread('rect.jpg')
+
+cv2.imshow('Image1', image1)
+cv2.imshow('Image2', image2)
+
+mask = np.zeros(image1.shape[:2], dtype=np.uint8)
+mask[130:270, 150:200] = 255
+
+dest_and1 = cv2.bitwise_and(image2, image1, mask = None)
+cv2.imshow('Bitwise AND1', dest_and1)
+
+dest_and = cv2.bitwise_and(image2, image1, mask = mask)
+cv2.imshow('Bitwise AND', dest_and)
+
+#dest_or = cv2.bitwise_or(image2, image1, mask = None)
+#cv2.imshow('Bitwise OR', dest_or)
+
+#dest_xor = cv2.bitwise_xor(image2, image1, mask = None)
+#cv2.imshow('Bitwise XOR', dest_xor)
+
+#dest_not = cv2.bitwise_not(image1, mask = None)
+#cv2.imshow('Bitwise NOT', dest_not)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #8.  Decision Based IDE3
 
 
