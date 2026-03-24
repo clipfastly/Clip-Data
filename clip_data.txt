@@ -1,3 +1,71 @@
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+
+image=cv2.imread('input.jpg')
+cv2.imshow('title',image)
+
+image_gray=cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
+kernel=np.ones((3,3),np.uint8)
+dilated=cv2.dilate(image_gray,kernel,iterations=2)
+eroded=cv2.erode(image_gray,kernel,iterations=2)
+opening=cv2.morphologyEx(image_gray,cv2.MORPH_OPEN,kernel)
+closing=cv2.morphologyEx(image_gray,cv2.MORPH_CLOSE,kernel)
+
+fig,axs=plt.subplots(2,2,figsize=(7,7))
+
+axs[0,0].imshow(dilated,cmap='Greys')
+axs[0,0].set_title('Dilated image')
+axs[0,0].set_xticks([])
+axs[0,0].set_yticks([])
+
+axs[0,1].imshow(eroded,cmap='Greys')
+axs[0,1].set_title('Eroded image')
+axs[0,1].set_xticks([])
+axs[0,1].set_yticks([])
+
+axs[1,0].imshow(opening,cmap='Greys')
+axs[1,0].set_title('opening')
+axs[1,0].set_xticks([])
+axs[1,0].set_yticks([])
+
+axs[1,1].imshow(closing,cmap='Greys')
+axs[1,1].set_title('closing')
+axs[1,1].set_xticks([])
+axs[1,1].set_yticks([])
+
+plt.tight_layout()
+plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Modern software repositories hosted on platforms such as GitHub contain a large number of reported issues including bugs, feature requests, and code improvements. Resolving these issues requires developers to manually analyze the problem, examine the source code, implement fixes, write test cases, and finally submit pull requests. This process can be time-consuming and often slows down the development cycle, especially in large-scale projects.
 Recent advancements in Artificial Intelligence and Large Language Models (LLMs) have shown promising capabilities in understanding programming languages and assisting developers in coding tasks. However, most existing AI-based tools rely on a single model to perform multiple tasks, which limits their efficiency when handling complex software workflows.
 In this project, we propose a Multi-Agent Orchestration System that automates the process of resolving GitHub issues by coordinating multiple specialized AI agents. Each agent is responsible for a specific task such as analyzing the issue, understanding the codebase, planning the solution, generating code modifications, writing test cases, and creating a pull request. The coordination between these agents is managed by an orchestrator implemented using a graph-based workflow architecture.
