@@ -1,3 +1,19 @@
+https://chatgpt.com/share/69c1700a-eba4-8324-abff-579fed4b1d2c
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
