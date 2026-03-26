@@ -1,16 +1,3 @@
-https://chatgpt.com/share/69c4d4b6-e2c4-8324-b3ba-c49560900ab6
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 import cv2
