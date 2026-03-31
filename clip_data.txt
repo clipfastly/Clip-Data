@@ -7,7 +7,25 @@
 
 
 
+import cv2
+import numpy as np
+image1=cv2.imread('img.jpg')
+img=cv2.cvtColor(image1,cv2.COLOR_BGR2GRAY)
+ret,thresh1=cv2.threshold(img,120,255,cv2.THRESH_BINARY)
+ret,thresh2=cv2.threshold(img,120,255,cv2.THRESH_BINARY_INV)
+ret,thresh3=cv2.threshold(img,120,255,cv2.THRESH_TRUNC)
+ret,thresh4=cv2.threshold(img,120,255,cv2.THRESH_TOZERO)
+ret,thresh5=cv2.threshold(img,120,255,cv2.THRESH_TOZERO_INV)
 
+
+cv2.imshow('Binary threshold',thresh1)
+cv2.imshow('Binary threshold Inverted',thresh2)
+cv2.imshow('Truncated threshold',thresh3)
+cv2.imshow('Set to zero',thresh4)
+cv2.imshow('set to zero Inverted',thresh5)
+
+if cv2.waitKey(0) and 0xff==27:
+    cv2.destroyAllwindows()
 
 import cv2
 import numpy as np
