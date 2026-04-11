@@ -1,12 +1,3 @@
-TEAM 3
-Tentative Title: Agribloom - Smart Crop and Advisory Management System 
-Team Members:
-Mentor: Dr. Sayyada Fahmeeda, Associate Professor, CSE Deparment, PDA College of Engineering
-1.	Waseem Akram (USN: 3PD23CS187, VI Sem. CSE Dept.), Mobile No. : 8660930380,       Email : waseemakram8660@gmail.com
-2.	Mohammed Yahya (USN: 3PD23CS076 VI Sem. CSE Dept.), Mobile No. : 9481292430, Email : yahya94812@gmail.com
-3.	Md Badruddin (USN: 3PD23CS067 VI Sem. CSE Dept.), Mobile No. :9900231828, Email : md.badruddin1828@gmail.com
-4.	Shaikh Muteef, (USN: 3PD23CS138 VI Sem. CSE Dept.), Mobile No. : 8095856892,  Email : shaikhmuteef@gmail.com
-5.	Prerita Pujari (USN: 3PD23CG033 VI Sem. CSE Dept.), Mobile No. : 8618654650, Email : preritapujari@gmail.com
 
 
 
