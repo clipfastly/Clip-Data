@@ -1,5 +1,14 @@
 https://chatgpt.com/share/69eed4c8-4454-83a8-a3c7-ef0373b00626
 
+import cv2
+import numpy as np
+image1=cv2.imread('img1.jpg')
+img=cv2.cvtColor(image1,cv2.COLOR_BGR2GRAY)
+ret,thresh1=cv2.threshold(img,120,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+cv2.imshow('OTSUthreshold',thresh1)
+if cv2.waitkey(0) &0xff==27:
+     cv2.destroyAllWindows()
+    
 
 
 You’re basically trying to build an “AI-powered company with multiple departments working autonomously” — that’s a strong, hackathon-ready idea if framed correctly.
