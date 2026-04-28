@@ -9,6 +9,13 @@ cv2.imshow('OTSUthreshold',thresh1)
 if cv2.waitkey(0) &0xff==27:
      cv2.destroyAllWindows()
     
+import cv2
+img=cv2.imread('img1.jpg')
+imgYC=cv2.cvtColor(img,cv2.COLOR_BGR2YCrCb)
+cv2.imshow('YCrCbimage',imgYC)
+cv2.waitkey(0)
+cv2.destroyAllWindows()
+imgHSV=cv2.cvtColor(img,cv2.COLOR-bgr2hsv)
 
 
 You’re basically trying to build an “AI-powered company with multiple departments working autonomously” — that’s a strong, hackathon-ready idea if framed correctly.
