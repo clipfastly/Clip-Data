@@ -1,4 +1,4 @@
-
+https://chatgpt.com/uc/6aa90d07-101c-83ea-8192-bd81768a3646
 
 from cryptography.hazmat.primitives import hashes
 
