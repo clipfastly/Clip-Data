@@ -1,4 +1,3 @@
-https://play.google.com/store/apps/details?id=com.maahirtech.englishvibe
 
 Your MongoDB problem is clear: **MongoDB is failing because you are running Linux kernel `7.0.0-34`, while your installed MongoDB version refuses kernels `6.19+`.**
 
